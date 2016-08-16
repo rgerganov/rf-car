@@ -86,7 +86,7 @@ int main(int argc, char *argv[])
             dir = back;
             if (state[SDL_SCANCODE_RIGHT]) {
                 right_src = &right_arr_p;
-                dir = back_left;
+                dir = back_right;
             } else if (state[SDL_SCANCODE_LEFT]) {
                 left_src = &left_arr_p;
                 dir = back_left;
