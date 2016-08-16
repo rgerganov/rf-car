@@ -98,6 +98,8 @@ int main(int argc, char *argv[])
             left_src = &left_arr_p;
             dir = left;
         }
+        gain_tx = (gain_tx > 0) ? gain_tx : 0;
+        gain_tx = (gain_tx < 47) ? gain_tx : 47;
         state_change(dir, gain_tx);
         SDL_SetRenderDrawColor(renderer, 0xdc, 0xdc, 0xdc, 0xFF);
         SDL_RenderClear(renderer);
@@ -116,8 +118,6 @@ int main(int argc, char *argv[])
         SDL_SetRenderDrawColor(renderer, 0xdc, 0xdc, 0xdc, 0xFF);
         SDL_RenderFillRect(renderer, &gain_border);
         SDL_SetRenderDrawColor(renderer, 0xff, 0x00, 0x00, 0xFF);
-        gain_tx = (gain_tx > 0) ? gain_tx : 0;
-        gain_tx = (gain_tx < 47) ? gain_tx : 47;
         for (int i =  0 ; i < gain_tx ; i++) {
             SDL_RenderFillRect(renderer, &gain_one);
             gain_one.x += 12;
