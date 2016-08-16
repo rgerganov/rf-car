@@ -1,6 +1,7 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
 #include <stdio.h>
+#include "rf.h"
 
 int main(int argc, char *argv[])
 {
@@ -17,6 +18,9 @@ int main(int argc, char *argv[])
     SDL_Renderer *renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
     if (renderer == NULL) {
         fprintf(stderr, "CreateRenderer Error: %s\n", SDL_GetError());
+        return 1;
+    }
+    if (!init_rf()) {
         return 1;
     }
 
@@ -66,25 +70,35 @@ int main(int argc, char *argv[])
         SDL_Rect *right_src = &right_arr;
         SDL_Rect *left_src = &left_arr;
         const Uint8 *state = SDL_GetKeyboardState(NULL);
+        Direction dir = none;
         if (state[SDL_SCANCODE_UP]) {
             up_src = &up_arr_p;
+            dir = fwd;
             if (state[SDL_SCANCODE_RIGHT]) {
                 right_src = &right_arr_p;
+                dir = fwd_right;
             } else if (state[SDL_SCANCODE_LEFT]) {
                 left_src = &left_arr_p;
+                dir = fwd_left;
             }
         } else if (state[SDL_SCANCODE_DOWN]) {
             down_src = &down_arr_p;
+            dir = back;
             if (state[SDL_SCANCODE_RIGHT]) {
                 right_src = &right_arr_p;
+                dir = back_left;
             } else if (state[SDL_SCANCODE_LEFT]) {
                 left_src = &left_arr_p;
+                dir = back_left;
             }
         } else if (state[SDL_SCANCODE_RIGHT]) {
             right_src = &right_arr_p;
+            dir = right;
         } else if (state[SDL_SCANCODE_LEFT]) {
             left_src = &left_arr_p;
+            dir = left;
         }
+        state_change(dir, gain_tx);
         SDL_SetRenderDrawColor(renderer, 0xdc, 0xdc, 0xdc, 0xFF);
         SDL_RenderClear(renderer);
         SDL_RenderCopy(renderer, arrows, up_src, &up_dst);
@@ -111,6 +125,7 @@ int main(int argc, char *argv[])
         SDL_RenderPresent(renderer);
     }
 
+    close_rf();
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
     SDL_Quit();
