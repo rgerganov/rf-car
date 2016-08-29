@@ -5,6 +5,10 @@
 
 using namespace std;
 
+static const int FREQ = 40684300; // 40.684 MHz
+static const int SAMPLE_RATE = 2000000;
+static const int SYMBOL_RATE = 2018;
+
 static vector<int> patterns[9];
 static vector<float> filter;
 static volatile Direction last_dir = none;
@@ -51,12 +55,13 @@ static void init_patterns()
 }
 
 static int tx_callback(hackrf_transfer* transfer) {
+    int spb = SAMPLE_RATE / SYMBOL_RATE; // samples per bit
     for (int i = 0 ; i < transfer->valid_length/2 ; i++) {
         vector<int> &pattern = patterns[last_dir];
         int pattern_size = pattern.size();
         float sum = 0;
         for (int j = 0 ; j < (int)filter.size() ; j++) {
-            int sample = pattern[((pos + j)/1000) % pattern_size];
+            int sample = pattern[((pos + j)/spb) % pattern_size];
             sum += filter[j] * sample;
         }
         pos += 1;
@@ -83,17 +88,16 @@ static void start_tx()
     if (result != HACKRF_SUCCESS) {
         fprintf(stderr, "hackrf_open() failed: (%d)\n", result);
     }
-    uint32_t sample_rate_hz = 2018000;
-    result = hackrf_set_sample_rate_manual(device, sample_rate_hz, 1);
+    result = hackrf_set_sample_rate_manual(device, SAMPLE_RATE, 1);
     if (result != HACKRF_SUCCESS) {
         fprintf(stderr, "hackrf_sample_rate_set() failed: (%d)\n", result);
     }
-    uint32_t baseband_filter_bw_hz = hackrf_compute_baseband_filter_bw_round_down_lt(sample_rate_hz);
+    uint32_t baseband_filter_bw_hz = hackrf_compute_baseband_filter_bw_round_down_lt(SAMPLE_RATE);
     result = hackrf_set_baseband_filter_bandwidth(device, baseband_filter_bw_hz);
     if (result != HACKRF_SUCCESS) {
         fprintf(stderr, "hackrf_baseband_filter_bandwidth_set() failed: (%d)\n", result);
     }
-    result = hackrf_set_freq(device, 40684300);
+    result = hackrf_set_freq(device, FREQ);
     if (result != HACKRF_SUCCESS) {
         fprintf(stderr, "hackrf_set_freq() failed: (%d)\n", result);
     }
