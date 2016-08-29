@@ -1,5 +1,5 @@
-#include <stdio.h>
 #include <libhackrf/hackrf.h>
+#include <cstdio>
 #include <vector>
 #include "rf.h"
 
@@ -74,58 +74,44 @@ bool init_rf()
         fprintf(stderr, "hackrf_init() failed: (%d)\n", result);
         return false;
     }
-    result = hackrf_open_by_serial(NULL, &device);
+    return true;
+}
+
+static void start_tx()
+{
+    int result = hackrf_open_by_serial(NULL, &device);
     if (result != HACKRF_SUCCESS) {
         fprintf(stderr, "hackrf_open() failed: (%d)\n", result);
-        return false;
     }
     uint32_t sample_rate_hz = 2018000;
     result = hackrf_set_sample_rate_manual(device, sample_rate_hz, 1);
     if (result != HACKRF_SUCCESS) {
         fprintf(stderr, "hackrf_sample_rate_set() failed: (%d)\n", result);
-        return false;
     }
     uint32_t baseband_filter_bw_hz = hackrf_compute_baseband_filter_bw_round_down_lt(sample_rate_hz);
     result = hackrf_set_baseband_filter_bandwidth(device, baseband_filter_bw_hz);
     if (result != HACKRF_SUCCESS) {
         fprintf(stderr, "hackrf_baseband_filter_bandwidth_set() failed: (%d)\n", result);
-        return false;
-    }
-    result = hackrf_set_txvga_gain(device, last_gain_tx);
-    result |= hackrf_start_tx(device, tx_callback, NULL);
-    if (result != HACKRF_SUCCESS) {
-        fprintf(stderr, "hackrf_s?() failed: (%d)\n", result);
-        return false;
     }
     result = hackrf_set_freq(device, 40684300);
     if (result != HACKRF_SUCCESS) {
         fprintf(stderr, "hackrf_set_freq() failed: (%d)\n", result);
-        return false;
     }
     result = hackrf_set_amp_enable(device, 1);
     if (result != HACKRF_SUCCESS) {
         fprintf(stderr, "hackrf_set_amp_enable() failed: (%d)\n", result);
-        return false;
     }
-    return true;
-}
-
-void state_change(Direction dir, int gain_tx)
-{
-    if (gain_tx != last_gain_tx) {
-        int result = hackrf_set_txvga_gain(device, gain_tx);
-        if (result != HACKRF_SUCCESS) {
-            fprintf(stderr, "hackrf_set_txvga_gain() failed: (%d)\n", result);
-        }
-        last_gain_tx = gain_tx;
+    result = hackrf_set_txvga_gain(device, last_gain_tx);
+    if (result != HACKRF_SUCCESS) {
+        fprintf(stderr, "hackrf_set_txvga_gain() failed: (%d)\n", result);
     }
-    if (dir != last_dir) {
-        last_dir = dir;
-        pos = 0;
+    result = hackrf_start_tx(device, tx_callback, NULL);
+    if (result != HACKRF_SUCCESS) {
+        fprintf(stderr, "hackrf_start_tx() failed: (%d)\n", result);
     }
 }
 
-void close_rf()
+static void stop_tx()
 {
     int result = hackrf_stop_tx(device);
     if (result != HACKRF_SUCCESS) {
@@ -135,6 +121,29 @@ void close_rf()
     if (result != HACKRF_SUCCESS) {
         fprintf(stderr, "hackrf_close() failed: (%d)\n", result);
     }
+}
+
+void state_change(Direction dir, int gain_tx)
+{
+    if (gain_tx != last_gain_tx) {
+        last_gain_tx = gain_tx;
+    }
+    if (dir != last_dir) {
+        if (last_dir == none) {
+            last_dir = dir;
+            pos = 0;
+            start_tx();
+            return;
+        } else if (dir == none) {
+            stop_tx();
+        }
+        last_dir = dir;
+        pos = 0;
+    }
+}
+
+void close_rf()
+{
     hackrf_exit();
 }
 
