@@ -7,6 +7,10 @@ can move in 8 directions (forward, backward, left, right, forward-right,
 forward-left, backward-right, backward-left), then there is a great chance that
 you can use this program to control it.
 
+You can see it in action here:
+.. image:: screenshot.png
+   :target: https://youtu.be/itS2pWkgNrM
+
 how it works
 ------------
 The remote control is using OOK modulation with long and short pulses. One long
