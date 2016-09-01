@@ -8,6 +8,7 @@ forward-left, backward-right, backward-left), then there is a great chance that
 you can use this program to control it.
 
 You can see it in action here:
+
 .. image:: screenshot.png
    :target: https://youtu.be/itS2pWkgNrM
 
