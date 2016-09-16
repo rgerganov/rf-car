@@ -5,9 +5,7 @@
 
 using namespace std;
 
-static const int FREQ = 40684300; // 40.684 MHz
-static const int SAMPLE_RATE = 2000000;
-static const int SYMBOL_RATE = 2018;
+struct global_args_t rf_global_args;
 
 static vector<int> patterns[9];
 static vector<float> filter;
@@ -55,7 +53,7 @@ static void init_patterns()
 }
 
 static int tx_callback(hackrf_transfer* transfer) {
-    int spb = SAMPLE_RATE / SYMBOL_RATE; // samples per bit
+    int spb = rf_global_args.SAMPLE_RATE / rf_global_args.SYMBOL_RATE; // samples per bit
     for (int i = 0 ; i < transfer->valid_length/2 ; i++) {
         vector<int> &pattern = patterns[last_dir];
         int pattern_size = pattern.size();
@@ -88,16 +86,16 @@ static void start_tx()
     if (result != HACKRF_SUCCESS) {
         fprintf(stderr, "hackrf_open() failed: (%d)\n", result);
     }
-    result = hackrf_set_sample_rate_manual(device, SAMPLE_RATE, 1);
+    result = hackrf_set_sample_rate_manual(device, rf_global_args.SAMPLE_RATE, 1);
     if (result != HACKRF_SUCCESS) {
         fprintf(stderr, "hackrf_sample_rate_set() failed: (%d)\n", result);
     }
-    uint32_t baseband_filter_bw_hz = hackrf_compute_baseband_filter_bw_round_down_lt(SAMPLE_RATE);
+    uint32_t baseband_filter_bw_hz = hackrf_compute_baseband_filter_bw_round_down_lt(rf_global_args.SAMPLE_RATE);
     result = hackrf_set_baseband_filter_bandwidth(device, baseband_filter_bw_hz);
     if (result != HACKRF_SUCCESS) {
         fprintf(stderr, "hackrf_baseband_filter_bandwidth_set() failed: (%d)\n", result);
     }
-    result = hackrf_set_freq(device, FREQ);
+    result = hackrf_set_freq(device, rf_global_args.FREQ);
     if (result != HACKRF_SUCCESS) {
         fprintf(stderr, "hackrf_set_freq() failed: (%d)\n", result);
     }

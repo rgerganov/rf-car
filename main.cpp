@@ -1,10 +1,38 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
 #include "rf.h"
 
 int main(int argc, char *argv[])
 {
+    char optc;
+
+    rf_global_args.FREQ = DEFAULT_FREQ;
+    rf_global_args.SAMPLE_RATE = DEFAULT_SAMPLE_RATE;
+    rf_global_args.SYMBOL_RATE = DEFAULT_SYMBOL_RATE;
+
+    while ((optc = getopt(argc, argv, "f:s:b:")) > 0) {
+        switch (optc) {
+        case 'f':
+            rf_global_args.FREQ = atoi(optarg);
+            break;
+        case 's':
+            rf_global_args.SAMPLE_RATE = atoi(optarg);
+            break;
+        case 'b':
+            rf_global_args.SYMBOL_RATE = atoi(optarg);
+            break;
+        default:
+            fprintf(stderr, "%s [args]\n", argv[0]);
+            fprintf(stderr, "\t-f FREQUENCY\n");
+            fprintf(stderr, "\t-s SAMPLE_RATE\n");
+            fprintf(stderr, "\t-y SYMBOL_RATE\n");
+            exit(EXIT_FAILURE);
+        }
+    }
+
     if (SDL_Init(SDL_INIT_VIDEO) != 0) {
         fprintf(stderr, "SDL_Init Error: %s\n", SDL_GetError());
         return 1;
