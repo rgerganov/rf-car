@@ -8,12 +8,15 @@
 int main(int argc, char *argv[])
 {
     char optc;
+    bool invert_steering = false;
+    bool invert_throttle = false;
+    bool invert_axis = false;
 
     rf_global_args.FREQ = DEFAULT_FREQ;
     rf_global_args.SAMPLE_RATE = DEFAULT_SAMPLE_RATE;
     rf_global_args.SYMBOL_RATE = DEFAULT_SYMBOL_RATE;
 
-    while ((optc = getopt(argc, argv, "f:s:b:")) > 0) {
+    while ((optc = getopt(argc, argv, "f:s:b:STA")) > 0) {
         switch (optc) {
         case 'f':
             rf_global_args.FREQ = atoi(optarg);
@@ -24,11 +27,23 @@ int main(int argc, char *argv[])
         case 'b':
             rf_global_args.SYMBOL_RATE = atoi(optarg);
             break;
+        case 'S':
+            invert_steering = true;
+            break;
+        case 'T':
+            invert_throttle = true;
+            break;
+        case 'A':
+            invert_axis = true;
+            break;
         default:
             fprintf(stderr, "%s [args]\n", argv[0]);
-            fprintf(stderr, "\t-f FREQUENCY\n");
-            fprintf(stderr, "\t-s SAMPLE_RATE\n");
-            fprintf(stderr, "\t-y SYMBOL_RATE\n");
+            fprintf(stderr, "\t-f FREQUENCY\tset frequency (integer, HZ)\n");
+            fprintf(stderr, "\t-s SAMPLE_RATE\tset sample rate\n");
+            fprintf(stderr, "\t-y SYMBOL_RATE\tset symbol rate\n");
+            fprintf(stderr, "\t-S\t\tinvert steering\n");
+            fprintf(stderr, "\t-T\t\tinvert throttle\n");
+            fprintf(stderr, "\t-A\t\tswap axes (ie. use steering for throttle and throttle for steering)\n");
             exit(EXIT_FAILURE);
         }
     }
@@ -126,6 +141,87 @@ int main(int argc, char *argv[])
             left_src = &left_arr_p;
             dir = left;
         }
+        if (invert_throttle) {
+            // fwd <-> back
+            switch (dir) {
+            case fwd:
+                dir = back;
+                break;
+            case fwd_left:
+                dir = back_left;
+                break;
+            case fwd_right:
+                dir = back_right;
+                break;
+            case back_left:
+                dir = fwd_left;
+                break;
+            case back_right:
+                dir = back_right;
+                break;
+            case back:
+                dir = fwd;
+                break;
+            default:
+                // left, right
+                break;
+            }
+        }
+
+        if (invert_steering) {
+            // left <-> right
+            switch (dir) {
+            case left:
+                dir = right;
+                break;
+            case fwd_left:
+                dir = fwd_right;
+                break;
+            case fwd_right:
+                dir = fwd_left;
+                break;
+            case back_left:
+                dir = back_right;
+                break;
+            case back_right:
+                dir = back_left;
+                break;
+            case right:
+                dir = left;
+                break;
+            default:
+                // fwd, back
+                break;
+            }
+        }
+
+        if (invert_axis) {
+            // left <-> fwd, right <-> back
+            switch (dir) {
+            case left:
+                dir = fwd;
+                break;
+            case fwd_right:
+                dir = back_left;
+                break;
+            case back_left:
+                dir = fwd_right;
+                break;
+            case right:
+                dir = back;
+                break;
+            case fwd:
+                dir = left;
+                break;
+            case back:
+                dir = right;
+                break;
+            default:
+                // fwd_left, back_right
+                break;
+            }
+        }
+
         gain_tx = (gain_tx > 0) ? gain_tx : 0;
         gain_tx = (gain_tx < 47) ? gain_tx : 47;
         state_change(dir, gain_tx);
