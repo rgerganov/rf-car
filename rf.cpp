@@ -15,6 +15,53 @@ static volatile unsigned int pos = 0;
 static hackrf_device *device = NULL;
 static int last_gain_tx = 20;
 
+void swap_direction(Direction *a, Direction *b) {
+    Direction tmp = *a;
+    *a = *b;
+    *b = tmp;
+}
+
+void set_direction_map(struct direction_map_t *map, bool invert_steering, bool invert_throttle, bool swap_axes) {
+    /* we are going to treat our struct like a 3x3 array */
+    Direction *map_arr = (Direction *)map;
+
+    map_arr[0] = fwd_left;
+    map_arr[1] = fwd;
+    map_arr[2] = fwd_right;
+    map_arr[3] = left;
+    map_arr[4] = none;
+    map_arr[5] = right;
+    map_arr[6] = back_left;
+    map_arr[7] = back;
+    map_arr[8] = back_right;
+
+    if (swap_axes) {
+        /* treat map_arr as 3x3 array, transform s.t. map_arr[i][j] becomes map_arr[j][i] */
+        /* do this first so that invert_* work on the transformed values */
+        for (int i=0; i<3; i++) {
+            for (int j=0; j<3; j++) {
+                if (i<j) {
+                    swap_direction(map_arr + 3*j + i, map_arr + 3*i+ j);
+                }
+            }
+        }
+    }
+
+    if (invert_steering) {
+        /* treat map_arr as a 3x3 array, swap left and right columns */
+        for (int i = 0; i < 9; i+=3) {
+            swap_direction(map_arr + i, map_arr + i + 2);
+        }
+    }
+
+    if (invert_throttle) {
+        /* treat map_arr as a 3x3 array, swap top and bottom rows */
+        for (int i = 0; i < 3; i++) {
+            swap_direction(map_arr + i, map_arr + i + 6);
+        }
+    }
+}
+
 static void make_short_pulses(vector<int> &v, int num)
 {
     for (int i = 0 ; i < num ; i++) {
