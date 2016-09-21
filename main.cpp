@@ -1,10 +1,54 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
 #include "rf.h"
 
 int main(int argc, char *argv[])
 {
+    char optc;
+    bool invert_steering = false;
+    bool invert_throttle = false;
+    bool swap_axes = false;
+
+    struct direction_map_t direction_map;
+
+    rf_global_args.FREQ = DEFAULT_FREQ;
+    rf_global_args.SAMPLE_RATE = DEFAULT_SAMPLE_RATE;
+    rf_global_args.SYMBOL_RATE = DEFAULT_SYMBOL_RATE;
+
+    while ((optc = getopt(argc, argv, "f:s:STA")) > 0) {
+        switch (optc) {
+        case 'f':
+            rf_global_args.FREQ = atoi(optarg);
+            break;
+        case 's':
+            rf_global_args.SAMPLE_RATE = atoi(optarg);
+            break;
+        case 'S':
+            invert_steering = true;
+            break;
+        case 'T':
+            invert_throttle = true;
+            break;
+        case 'A':
+            swap_axes = true;
+            break;
+        default:
+            fprintf(stderr, "%s [args]\n", argv[0]);
+            fprintf(stderr, "\t-f FREQUENCY\tset frequency (integer, HZ)\n");
+            fprintf(stderr, "\t-s SAMPLE_RATE\tset sample rate\n");
+            fprintf(stderr, "\t-S\t\tinvert steering\n");
+            fprintf(stderr, "\t-T\t\tinvert throttle\n");
+            fprintf(stderr, "\t-A\t\tswap axes (ie. use steering for throttle and throttle for steering)\n");
+            exit(EXIT_FAILURE);
+        }
+    }
+
+    /* initialize direction_map */
+    set_direction_map(&direction_map, invert_steering, invert_throttle, swap_axes);
+
     if (SDL_Init(SDL_INIT_VIDEO) != 0) {
         fprintf(stderr, "SDL_Init Error: %s\n", SDL_GetError());
         return 1;
@@ -70,34 +114,35 @@ int main(int argc, char *argv[])
         SDL_Rect *right_src = &right_arr;
         SDL_Rect *left_src = &left_arr;
         const Uint8 *state = SDL_GetKeyboardState(NULL);
-        Direction dir = none;
+        Direction dir = direction_map.none;
         if (state[SDL_SCANCODE_UP]) {
             up_src = &up_arr_p;
-            dir = fwd;
+            dir = direction_map.fwd;
             if (state[SDL_SCANCODE_RIGHT]) {
                 right_src = &right_arr_p;
-                dir = fwd_right;
+                dir = direction_map.fwd_right;
             } else if (state[SDL_SCANCODE_LEFT]) {
                 left_src = &left_arr_p;
-                dir = fwd_left;
+                dir = direction_map.fwd_left;
             }
         } else if (state[SDL_SCANCODE_DOWN]) {
             down_src = &down_arr_p;
-            dir = back;
+            dir = direction_map.back;
             if (state[SDL_SCANCODE_RIGHT]) {
                 right_src = &right_arr_p;
-                dir = back_right;
+                dir = direction_map.back_right;
             } else if (state[SDL_SCANCODE_LEFT]) {
                 left_src = &left_arr_p;
-                dir = back_left;
+                dir = direction_map.back_left;
             }
         } else if (state[SDL_SCANCODE_RIGHT]) {
             right_src = &right_arr_p;
-            dir = right;
+            dir = direction_map.right;
         } else if (state[SDL_SCANCODE_LEFT]) {
             left_src = &left_arr_p;
-            dir = left;
+            dir = direction_map.left;
         }
+
         gain_tx = (gain_tx > 0) ? gain_tx : 0;
         gain_tx = (gain_tx < 47) ? gain_tx : 47;
         state_change(dir, gain_tx);
