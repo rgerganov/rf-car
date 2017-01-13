@@ -4,6 +4,8 @@ cache: apt
 
 sudo: false
 
+dist: trusty
+
 os:
   - linux
   - osx
