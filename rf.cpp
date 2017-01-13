@@ -129,7 +129,7 @@ bool init_rf()
 
 static void start_tx()
 {
-    int result = hackrf_open_by_serial(NULL, &device);
+    int result = hackrf_open(&device);
     if (result != HACKRF_SUCCESS) {
         fprintf(stderr, "hackrf_open() failed: (%d)\n", result);
     }
