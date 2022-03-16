@@ -1,54 +1,11 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
+
+#include "ui.h"
 #include "rf.h"
 
-int main(int argc, char *argv[])
+int RenderUI(RfCar *car)
 {
-    char optc;
-    bool invert_steering = false;
-    bool invert_throttle = false;
-    bool swap_axes = false;
-
-    struct direction_map_t direction_map;
-
-    rf_global_args.FREQ = DEFAULT_FREQ;
-    rf_global_args.SAMPLE_RATE = DEFAULT_SAMPLE_RATE;
-    rf_global_args.SYMBOL_RATE = DEFAULT_SYMBOL_RATE;
-
-    while ((optc = getopt(argc, argv, "f:s:STA")) > 0) {
-        switch (optc) {
-        case 'f':
-            rf_global_args.FREQ = atoi(optarg);
-            break;
-        case 's':
-            rf_global_args.SAMPLE_RATE = atoi(optarg);
-            break;
-        case 'S':
-            invert_steering = true;
-            break;
-        case 'T':
-            invert_throttle = true;
-            break;
-        case 'A':
-            swap_axes = true;
-            break;
-        default:
-            fprintf(stderr, "%s [args]\n", argv[0]);
-            fprintf(stderr, "\t-f FREQUENCY\tset frequency (integer, HZ)\n");
-            fprintf(stderr, "\t-s SAMPLE_RATE\tset sample rate\n");
-            fprintf(stderr, "\t-S\t\tinvert steering\n");
-            fprintf(stderr, "\t-T\t\tinvert throttle\n");
-            fprintf(stderr, "\t-A\t\tswap axes (ie. use steering for throttle and throttle for steering)\n");
-            exit(EXIT_FAILURE);
-        }
-    }
-
-    /* initialize direction_map */
-    set_direction_map(&direction_map, invert_steering, invert_throttle, swap_axes);
-
     if (SDL_Init(SDL_INIT_VIDEO) != 0) {
         fprintf(stderr, "SDL_Init Error: %s\n", SDL_GetError());
         return 1;
@@ -62,9 +19,6 @@ int main(int argc, char *argv[])
     SDL_Renderer *renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
     if (renderer == NULL) {
         fprintf(stderr, "CreateRenderer Error: %s\n", SDL_GetError());
-        return 1;
-    }
-    if (!init_rf()) {
         return 1;
     }
 
@@ -114,38 +68,40 @@ int main(int argc, char *argv[])
         SDL_Rect *right_src = &right_arr;
         SDL_Rect *left_src = &left_arr;
         const Uint8 *state = SDL_GetKeyboardState(NULL);
-        Direction dir = direction_map.none;
+        Direction dir = NONE;
         if (state[SDL_SCANCODE_UP]) {
             up_src = &up_arr_p;
-            dir = direction_map.fwd;
+            dir = FWD;
             if (state[SDL_SCANCODE_RIGHT]) {
                 right_src = &right_arr_p;
-                dir = direction_map.fwd_right;
+                dir = FWD_RIGHT;
             } else if (state[SDL_SCANCODE_LEFT]) {
                 left_src = &left_arr_p;
-                dir = direction_map.fwd_left;
+                dir = FWD_LEFT;
             }
         } else if (state[SDL_SCANCODE_DOWN]) {
             down_src = &down_arr_p;
-            dir = direction_map.back;
+            dir = BACK;
             if (state[SDL_SCANCODE_RIGHT]) {
                 right_src = &right_arr_p;
-                dir = direction_map.back_right;
+                dir = BACK_RIGHT;
             } else if (state[SDL_SCANCODE_LEFT]) {
                 left_src = &left_arr_p;
-                dir = direction_map.back_left;
+                dir = BACK_LEFT;
             }
         } else if (state[SDL_SCANCODE_RIGHT]) {
             right_src = &right_arr_p;
-            dir = direction_map.right;
+            dir = RIGHT;
         } else if (state[SDL_SCANCODE_LEFT]) {
             left_src = &left_arr_p;
-            dir = direction_map.left;
+            dir = LEFT;
         }
 
         gain_tx = (gain_tx > 0) ? gain_tx : 0;
         gain_tx = (gain_tx < 47) ? gain_tx : 47;
-        state_change(dir, gain_tx);
+ 
+        car->changeState(dir, gain_tx);
+
         SDL_SetRenderDrawColor(renderer, 0xdc, 0xdc, 0xdc, 0xFF);
         SDL_RenderClear(renderer);
         SDL_RenderCopy(renderer, arrows, up_src, &up_dst);
@@ -170,9 +126,9 @@ int main(int argc, char *argv[])
         SDL_RenderPresent(renderer);
     }
 
-    close_rf();
+    car->close();
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
     SDL_Quit();
-    return 0;
+	return 0;
 }
