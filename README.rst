@@ -1,6 +1,9 @@
 rf-car
 ------
-This is a small program for controlling RC cars with HackRF. 
+.. image:: https://github.com/rgerganov/rf-car/workflows/CI/badge.svg
+   :target: https://github.com/rgerganov/rf-car/actions
+
+This is a small program for controlling RC cars with HackRF.
 Most of the RC toys use the same protocol, so you just need to find the
 frequency on which the toy operate. In my case it is 40.684 MHz. If your RC toy
 can move in 8 directions (forward, backward, left, right, forward-right,
