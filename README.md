@@ -17,7 +17,7 @@ need to send 4 long pulses followed by 10 short pulses. We can easily find the
 control sequence for each direction by recording the signal from the RC and
 then analyse it with [inspectrum](https://github.com/miek/inspectrum):
 
-![ook-signal](/inspectrum-ook.png)]
+![ook-signal](/inspectrum-ook.png)
 
 To synthesize the signal with the HackRF, we need to transmit
 `SAMPLE_RATE/SYMBOL_RATE` samples ('1' or '0') for each bit of the control
@@ -27,7 +27,7 @@ We choose the `SAMPLE_RATE` to be 2M.
 ## `fsk_car`
 ![fsk-car](/fsk-car.jpg)
 
-This is the [Dickie Toys Flippy RC Car](https://www.amazon.de/-/en/Dickie-Flippy-Control-Rotation-Function/dp/B084PY44PN) and it moves in 6 directions. You can see it in action here:
+This is the [Dickie Toys Flippy RC Car](https://www.amazon.de/-/en/Dickie-Flippy-Control-Rotation-Function/dp/B084PY44PN), it works on 2.4 GHz and moves in 6 directions. You can see it in action here:
 
 [![demo-fsk](https://img.youtube.com/vi/mqSv-Nycy_4/0.jpg)](https://www.youtube.com/watch?v=mqSv-Nycy_4)
 
