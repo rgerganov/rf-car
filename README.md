@@ -39,13 +39,15 @@ The program depends only on SDL2, SDL2_image and libhackrf. To build on Linux:
 
     $ sudo apt-get install libsdl2-dev libsdl2-image-dev libhackrf-dev
     $ make
-    $ ./rf-car
+    $ ./ook_car
+    $ ./fsk_car
 
 To build on OSX:
 
     $ brew install sdl2 sdl2_image hackrf
     $ make
-    $ ./rf-car
+    $ ./ook_car
+    $ ./fsk_car
 
 # Support
 
