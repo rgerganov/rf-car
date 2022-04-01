@@ -3,7 +3,7 @@ SRC_DIR := src
 SRC := $(wildcard $(SRC_DIR)/*.cpp)
 OBJ := $(SRC:$(SRC_DIR)/%.cpp=$(SRC_DIR)/%.o)
 
-CXXFLAGS = -Wall -Iinclude $(shell pkg-config --cflags libhackrf) $(shell pkg-config --cflags sdl2)
+CXXFLAGS = -Wall -std=c++11 -Iinclude $(shell pkg-config --cflags libhackrf) $(shell pkg-config --cflags sdl2)
 LDFLAGS = $(shell pkg-config --libs sdl2) -lSDL2_image $(shell pkg-config --libs libhackrf)
 
 .PHONY: all clean
