@@ -31,11 +31,12 @@ This is the [Dickie Toys Flippy RC Car](https://www.amazon.de/-/en/Dickie-Flippy
 
 [![demo-fsk](https://img.youtube.com/vi/mqSv-Nycy_4/0.jpg)](https://www.youtube.com/watch?v=mqSv-Nycy_4)
 
-First you need to turn on the car and then start `fsk_car`. This is because `fsk_car` sends a synchronization pattern upon start and the car needs to receive it. More details on the remote protcol coming soon.
+First you need to turn on the car and then start `fsk_car`. This is because `fsk_car` sends a synchronization pattern upon start and the car needs to receive it.
+You can find more details about the remote protcol in this [blog post](https://xakcop.com/post/re-2.4ghz/).
 
 # Build & run
 
-The program depends only on SDL2, SDL2_image and libhackrf. To build on Linux:
+The programs depend only on SDL2, SDL2_image and libhackrf. To build on Linux:
 
     $ sudo apt-get install libsdl2-dev libsdl2-image-dev libhackrf-dev
     $ make
