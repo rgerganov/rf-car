@@ -48,6 +48,44 @@ protected:
     bool always_tx;
 };
 
+class FskCar : public RfCar
+{
+public:
+    FskCar(uint64_t freq, int sample_rate, int symbol_rate, bool always_tx) : RfCar(freq, sample_rate, symbol_rate, always_tx) {
+    }
+    virtual void txEnd();
+    virtual int txCallback(uint8_t* buffer, int valid_length);
+    virtual ~FskCar() {}
+
+protected:
+    // use maps as sparse arrays mapping array index to array value
+    std::unordered_map<int, int> patterns[11];
+    int pattern_size = 0;
+    int sync_pattern_size = 0;
+    float phase = 0;
+};
+
+class Dickie : public FskCar
+{
+public:
+    Dickie(uint64_t freq, int sample_rate, int symbol_rate, bool always_tx);
+    void sendSync();
+    virtual bool supportDirection(Direction dir) {
+        return dir != LEFT && dir != RIGHT;
+    }
+    virtual ~Dickie() {}
+};
+
+class RangeRover : public FskCar
+{
+public:
+    RangeRover(uint64_t freq, int sample_rate, int symbol_rate, bool always_tx);
+    virtual bool supportDirection(Direction dir) {
+        return true;
+    }
+    virtual ~RangeRover() {}
+};
+
 class OokCar : public RfCar
 {
 public:
@@ -67,25 +105,4 @@ private:
     std::vector<int> patterns[11];
     std::vector<float> filter;
 };
-
-class FskCar : public RfCar
-{
-public:
-    FskCar(uint64_t freq, int sample_rate, int symbol_rate, bool always_tx);
-    void sendSync();
-    virtual bool supportDirection(Direction dir) {
-        return dir != LEFT && dir != RIGHT;
-    }
-    virtual void txEnd();
-    virtual int txCallback(uint8_t* buffer, int valid_length);
-    virtual ~FskCar() {}
-
-private:
-    // use maps as sparse arrays mapping array index to array value
-    std::unordered_map<int, int> patterns[11];
-    int pattern_size = 0;
-    int sync_pattern_size = 0;
-    float phase = 0;
-};
-
 #endif

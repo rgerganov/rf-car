@@ -19,7 +19,7 @@ int main(int argc, char *argv[])
         }
     }
 
-    FskCar car(2444000000, 10000000, 1000000, always_tx);
+    Dickie car(2444000000, 10000000, 1000000, always_tx);
     if (!car.init()) {
         return 1;
     }
