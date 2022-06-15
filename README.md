@@ -24,15 +24,23 @@ To synthesize the signal with the HackRF, we need to transmit
 sequence. We can find the `SYMBOL_RATE` with inspectrum, it is about 2018.
 We choose the `SAMPLE_RATE` to be 2M.
 
-## `fsk_car`
-![fsk-car](/fsk-car.jpg)
+## `dickie`
+![dickie-car](/dickie.jpg)
 
 This is the [Dickie Toys Flippy RC Car](https://www.amazon.de/-/en/Dickie-Flippy-Control-Rotation-Function/dp/B084PY44PN), it works on 2.4 GHz and moves in 6 directions. You can see it in action here:
 
-[![demo-fsk](https://img.youtube.com/vi/mqSv-Nycy_4/0.jpg)](https://www.youtube.com/watch?v=mqSv-Nycy_4)
+[![demo-dickie](https://img.youtube.com/vi/mqSv-Nycy_4/0.jpg)](https://www.youtube.com/watch?v=mqSv-Nycy_4)
 
-First you need to turn on the car and then start `fsk_car`. This is because `fsk_car` sends a synchronization pattern upon start and the car needs to receive it.
-You can find more details about the remote protcol in this [blog post](https://xakcop.com/post/re-2.4ghz/).
+First you need to turn on the car and then start `dickie`. This is because `dickie` sends a synchronization pattern upon start and the car needs to receive it.
+You can find more details about the remote protocol in this [blog post](https://xakcop.com/post/re-2.4ghz/).
+
+## `rover`
+![rover-car](/rover.jpg)
+
+This is Range Rover donated by [thegiftscholars.com](https://www.thegiftscholars.com/cmj-rc-cars) especially for this project!
+It works on 2.4 GHz and moves in 8 directions. You can see it in action here:
+
+[![demo-rover](https://img.youtube.com/vi/QaZhaHERiQc/0.jpg)](https://www.youtube.com/watch?v=QaZhaHERiQc)
 
 # Build & run
 
@@ -41,14 +49,16 @@ The programs depend only on SDL2, SDL2_image and libhackrf. To build on Linux:
     $ sudo apt-get install libsdl2-dev libsdl2-image-dev libhackrf-dev
     $ make
     $ ./ook_car
-    $ ./fsk_car
+    $ ./dickie
+    $ ./rover
 
 To build on OSX:
 
     $ brew install sdl2 sdl2_image hackrf
     $ make
     $ ./ook_car
-    $ ./fsk_car
+    $ ./dickie
+    $ ./rover
 
 # Support
 
