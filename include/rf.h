@@ -76,6 +76,17 @@ public:
     virtual ~Dickie() {}
 };
 
+class Concept : public FskCar
+{
+public:
+    Concept(uint64_t freq, int sample_rate, int symbol_rate, bool always_tx);
+    void sendSync();
+    virtual bool supportDirection(Direction dir) {
+        return dir != LEFT && dir != RIGHT;
+    }
+    virtual ~Concept() {}
+};
+
 class RangeRover : public FskCar
 {
 public:
