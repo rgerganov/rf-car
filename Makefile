@@ -8,12 +8,15 @@ LDFLAGS = $(shell pkg-config --libs sdl2) -lSDL2_image $(shell pkg-config --libs
 
 .PHONY: all clean
 
-all: ook_car dickie rover
+all: ook_car dickie concept rover
 
 ook_car: src/ook_car.o src/rf.o src/ui.o
 	$(CXX) $^ -o $@ $(LDFLAGS)
 
 dickie: src/dickie.o src/rf.o src/ui.o
+	$(CXX) $^ -o $@ $(LDFLAGS)
+
+concept: src/concept.o src/rf.o src/ui.o
 	$(CXX) $^ -o $@ $(LDFLAGS)
 
 rover: src/rover.o src/rf.o src/ui.o
@@ -23,4 +26,4 @@ $(SRC_DIR)/%.o: $(SRC_DIR)/%.cpp
 	    $(CXX) $(CXXFLAGS) -c $< -o $@
 
 clean:
-	rm -f ook_car dickie rover $(OBJ)
+	rm -f ook_car dickie concept rover $(OBJ)
